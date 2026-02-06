@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>matrix_player_v5_portable</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body, html { height: 100%; width: 100%; font-family: 'Courier New', Courier, monospace; overflow: hidden; background-color: #000; }
+
+        .background {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: url('c59ad2bd4ad.gif'); background-size: cover; z-index: -1; filter: brightness(0.8);
+        }
+
+        .player-container {
+            height: 100%; display: flex; justify-content: center; align-items: center; background: rgba(0, 0, 0, 0.4);
+        }
+
+        .card {
+            position: relative; background: rgba(10, 10, 10, 0.85); backdrop-filter: blur(15px);
+            padding: 2.5rem 1.5rem; border-radius: 20px; text-align: center;
+            width: 90%; max-width: 400px; box-shadow: 0 0 30px rgba(0, 0, 0, 1);
+            overflow: hidden; display: flex; flex-direction: column; align-items: center;
+        }
+
+        /* 旋转流光逻辑 */
+        .card::before {
+            content: ''; position: absolute; top: 160px; left: 50%; width: 1000px; height: 1000px;
+            background-image: conic-gradient(transparent, #00FF41 10%, transparent 40%);
+            animation: rotate 4s linear infinite; z-index: 0;
+            margin-left: -500px; margin-top: -500px; transform-origin: center center;
+        }
+
+        .card::after {
+            content: ''; position: absolute; inset: 2px; background: rgba(10, 10, 10, 0.95); border-radius: 18px; z-index: 0;
+        }
+
+        .content-wrapper { position: relative; z-index: 1; width: 100%; }
+
+        .cover-art {
+            width: 100%; aspect-ratio: 1 / 1.25; margin-bottom: 1rem;
+            border-radius: 8px; background: url('ozq0qpozq0qpozq0.png') no-repeat center center/cover;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* 频谱画布 */
+        #visualizer { width: 100%; height: 50px; margin-bottom: 1rem; }
+
+        h2 { color: #00FF41; font-size: 0.9rem; margin-bottom: 0.5rem; letter-spacing: 2px; text-shadow: 0 0 10px #00FF41; }
+        p { color: #FFFFFF; font-size: 0.7rem; margin-bottom: 1.5rem; opacity: 0.6; }
+
+        .mechanical-controls { width: 100%; margin-bottom: 20px; }
+        input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; }
+        input[type="range"]::-webkit-slider-runnable-track { height: 4px; background: #050505; border: 1px solid #1a1a1a; }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 14px; width: 6px; background: #121212;
+            border: 1px solid #333; margin-top: -6px; box-shadow: 0 0 5px rgba(0, 255, 65, 0.2);
+        }
+
+        /* 按钮与音量并排 */
+        .control-panel {
+            display: flex; align-items: center; justify-content: space-between; gap: 15px; width: 100%;
+        }
+
+        .play-pause-btn {
+            background: #0a0a0a; border: 1px solid #222; color: #444;
+            padding: 10px 15px; font-size: 0.65rem; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 2px; flex: 1.2;
+        }
+
+        .vol-box { display: flex; align-items: center; gap: 8px; flex: 1; }
+        .vol-label { color: #00FF41; font-size: 10px; opacity: 0.5; }
+        .vol-slider { flex: 1; }
+
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="player-container">
+        <div class="card">
+            <div class="content-wrapper">
+                <div class="cover-art"></div>
+                <canvas id="visualizer"></canvas>
+                <h2>01001100 01001001 01010100</h2>
+                <p>TERMINAL_AUDIO_STREAM</p>
+                <div class="mechanical-controls">
+                    <input type="range" id="seek-slider" value="0" max="100">
+                </div>
+                <div class="control-panel">
+                    <button class="play-pause-btn" id="play-btn">Initialize</button>
+                    <div class="vol-box">
+                        <span class="vol-label">VOL</span>
+                        <input type="range" id="volume-slider" class="vol-slider" min="0" max="1" step="0.01" value="0.5">
+                    </div>
+                </div>
+                <audio id="music-track">
+                    <source src="ogryzekauraslowed.mp3" type="audio/mpeg">
+                </audio>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const audio = document.getElementById('music-track');
+        const playBtn = document.getElementById('play-btn');
+        const seekSlider = document.getElementById('seek-slider');
+        const volSlider = document.getElementById('volume-slider');
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+
+        let audioCtx, analyser, source, dataArray;
+        let isLocalFile = window.location.protocol === 'file:';
+
+        function initAudio() {
+            if (!audioCtx) {
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    analyser = audioCtx.createAnalyser();
+                    source = audioCtx.createMediaElementSource(audio);
+                    source.connect(analyser);
+                    analyser.connect(audioCtx.destination);
+                    analyser.fftSize = 64;
+                    dataArray = new Uint8Array(analyser.frequencyBinCount);
+                } catch (e) {
+                    console.log("Local mode: Using simulated visualizer.");
+                }
+            }
+        }
+
+        function draw() {
+            requestAnimationFrame(draw);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const barCount = 32;
+            const barWidth = (canvas.width / barCount) * 2;
+
+            if (analyser && !audio.paused) {
+                analyser.getByteFrequencyData(dataArray);
+            }
+
+            for(let i = 0; i < barCount; i++) {
+                let barHeight;
+                if (!audio.paused) {
+                    // 如果是本地模式且 analyser 被阻断，则产生随机脉冲模拟频谱
+                    barHeight = analyser ? (dataArray[i] / 4) : (Math.random() * 20 + 5);
+                } else {
+                    barHeight = 2; // 停止时保持基准线
+                }
+                
+                ctx.fillStyle = `rgba(0, 255, 65, ${barHeight / 50 + 0.1})`;
+                ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 2, barHeight);
+            }
+        }
+
+        playBtn.addEventListener('click', () => {
+            initAudio();
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+
+            if (audio.paused) {
+                audio.play().then(() => {
+                    playBtn.innerText = 'Running';
+                    playBtn.style.color = '#00FF41';
+                }).catch(err => {
+                    alert("请确认目录中存在 ogryzekauraslowed.mp3 文件。");
+                });
+            } else {
+                audio.pause();
+                playBtn.innerText = 'Halt';
+                playBtn.style.color = '#444';
+            }
+        });
+
+        // 启动循环
+        draw();
+
+        audio.addEventListener('timeupdate', () => { seekSlider.value = (audio.currentTime / audio.duration) * 100 || 0; });
+        seekSlider.addEventListener('input', () => { audio.currentTime = (seekSlider.value / 100) * audio.duration; });
+        volSlider.addEventListener('input', () => { audio.volume = volSlider.value; });
+    </script>
+</body>
+</html>
