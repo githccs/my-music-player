@@ -10,11 +10,11 @@
 
         .background {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background-image: url('c59ad2bd4ad.gif'); background-size: cover; z-index: -1; filter: brightness(0.8); pointer-events: none;
+            background-image: url('c59ad2bd4ad.gif'); background-size: cover; background-position: center; z-index: 0; filter: brightness(0.8); pointer-events: none;
         }
 
         .player-container {
-            height: 100%; display: flex; justify-content: center; align-items: center; background: rgba(0, 0, 0, 0.4);
+            position: relative; z-index: 1; height: 100%; display: flex; justify-content: center; align-items: center; background: rgba(0, 0, 0, 0.4);
         }
 
         .card {
@@ -157,5 +157,6 @@
     </script>
 </body>
 </html>
+
 
 
