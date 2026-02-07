@@ -39,8 +39,10 @@
 
         .cover-art {
             width: 100%; aspect-ratio: 1 / 1.25; margin-bottom: 1rem;
-            border-radius: 8px; background: url('ozq0qpozq0qpozq1.png') no-repeat center center/cover;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px; 
+            background: url('ozq0qpozq0qpozq1.png') no-repeat top center/cover;
+            border: 1px solid rgba(0, 255, 65, 0.2);
+            transition: all 0.5s ease;
         }
 
         #visualizer { width: 100%; height: 50px; margin-bottom: 1rem; }
@@ -61,9 +63,17 @@
         }
 
         .play-pause-btn {
-            background: #0a0a0a; border: 1px solid #222; color: #444;
+            background: #0a0a0a; border: 1px solid #440000; color: #660000;
             padding: 10px 15px; font-size: 0.65rem; cursor: pointer;
             text-transform: uppercase; letter-spacing: 2px; flex: 1.2;
+            transition: all 0.3s ease;
+            animation: pulse-red 2s infinite;
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0px rgba(255, 0, 0, 0); }
+            50% { box-shadow: 0 0 10px rgba(255, 0, 0, 0.3); color: #aa0000; }
+            100% { box-shadow: 0 0 0px rgba(255, 0, 0, 0); }
         }
 
         .vol-box { display: flex; align-items: center; gap: 8px; flex: 1; }
@@ -86,7 +96,7 @@
                     <input type="range" id="seek-slider" value="0" max="100">
                 </div>
                 <div class="control-panel">
-                    <button class="play-pause-btn" id="play-btn">Initialize</button>
+                    <button class="play-pause-btn" id="play-btn">SYSTEM OFFLINE</button>
                     <div class="vol-box">
                         <span class="vol-label">VOL</span>
                         <input type="range" id="volume-slider" class="vol-slider" min="0" max="1" step="0.01" value="0.5">
@@ -130,7 +140,9 @@
             let x = 0;
             for(let i = 0; i < dataArray.length; i++) {
                 const barHeight = dataArray[i] / 4;
-                ctx.fillStyle = `rgba(0, 255, 65, ${barHeight / 60 + 0.1})`;
+                ctx.fillStyle = `rgba(0, 255, 65, ${barHeight / 50 + 0.2})`;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#00FF41';
                 ctx.fillRect(x, canvas.height - barHeight, barWidth - 2, barHeight);
                 x += barWidth;
             }
@@ -139,15 +151,20 @@
         playBtn.addEventListener('click', () => {
             initAudio();
             if (audioCtx.state === 'suspended') audioCtx.resume();
+            
             if (audio.paused) {
                 audio.play().then(() => {
-                    playBtn.innerText = 'Running';
+                    playBtn.innerText = 'ACCESS GRANTED';
                     playBtn.style.color = '#00FF41';
+                    playBtn.style.borderColor = '#00FF41';
+                    playBtn.style.animation = 'none'; 
                 });
             } else {
                 audio.pause();
-                playBtn.innerText = 'Halt';
-                playBtn.style.color = '#444';
+                playBtn.innerText = 'CONNECTION HALTED';
+                playBtn.style.color = '#ff0000';
+                playBtn.style.borderColor = '#440000';
+                playBtn.style.animation = 'pulse-red 2s infinite';
             }
         });
 
@@ -157,6 +174,7 @@
     </script>
 </body>
 </html>
+
 
 
 
