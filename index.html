@@ -19,7 +19,7 @@
 
         .card {
             position: relative; background: rgba(10, 10, 10, 0.85); backdrop-filter: blur(15px);
-            padding: 2.5rem 1.5rem; border-radius: 20px; text-align: center;
+            padding: 1.5rem; border-radius: 20px; text-align: center;
             width: 90%; max-width: 400px; box-shadow: 0 0 30px rgba(0, 0, 0, 1);
             overflow: hidden; display: flex; flex-direction: column; align-items: center;
         }
@@ -46,23 +46,19 @@
         .content-wrapper { position: relative; z-index: 1; width: 100%; }
 
         .cover-art {
-            width: 100%; aspect-ratio: 1 / 1.25; margin-bottom: 1rem;
+            width: 100%; aspect-ratio: 1 / 1.25; margin-bottom: 0.5rem;
             border-radius: 8px; 
             background: url('ozq0qpozq0qpozq1.png') no-repeat top center/cover;
-            border: none;
-            animation: none;
-            transition: none;
-            box-shadow: none;
             position: relative;
             z-index: 2;
         }
 
-        #visualizer { width: 100%; height: 50px; margin-bottom: 1rem; }
+        #visualizer { width: 100%; height: 35px; margin-bottom: 0.2rem; }
 
         h2 { 
             color: #660000; 
             font-size: 0.9rem; 
-            margin-bottom: 0.5rem; 
+            margin-bottom: 0.8rem; 
             letter-spacing: 2px; 
             text-shadow: 0 0 8px rgba(255, 0, 0, 0.3);
             position: relative;
@@ -79,23 +75,20 @@
         h2.active::after {
             content: '01100011 01100011 01110011';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: #0a0a0a;
         }
 
         h2.active::before {
-            left: 4px;
-            text-shadow: -3px 0 #ff00c1;
+            left: 3px;
+            text-shadow: -2px 0 #ff00c1;
             clip: rect(44px, 450px, 56px, 0);
             animation: glitch-anim 0.4s infinite linear alternate-reverse;
         }
 
         h2.active::after {
-            left: -4px;
-            text-shadow: -3px 0 #00fff9, 3px 3px #ff00c1;
+            left: -3px;
+            text-shadow: -2px 0 #00fff9, 2px 2px #ff00c1;
             animation: glitch-anim2 0.3s infinite linear alternate-reverse;
         }
 
@@ -116,37 +109,49 @@
             100% { clip: rect(20px, 9999px, 45px, 0); }
         }
 
-        p { color: #FFFFFF; font-size: 0.7rem; margin-bottom: 1.5rem; opacity: 0.6; }
+        .system-log {
+            width: 100%; height: 60px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid #1a1a1a;
+            margin-bottom: 1rem; padding: 6px;
+            overflow: hidden; text-align: left; border-radius: 4px;
+        }
 
-        .mechanical-controls { width: 100%; margin-bottom: 20px; }
+        .log-line {
+            color: #00FF41; font-size: 9px; line-height: 1.4;
+            opacity: 0.7; font-family: monospace;
+            animation: log-fade 0.2s ease-out forwards;
+        }
+
+        @keyframes log-fade {
+            from { opacity: 0; transform: translateY(2px); }
+            to { opacity: 0.7; transform: translateY(0); }
+        }
+
+        .mechanical-controls { width: 100%; margin-bottom: 15px; }
         input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; }
         input[type="range"]::-webkit-slider-runnable-track { height: 4px; background: #050505; border: 1px solid #1a1a1a; }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none; height: 14px; width: 6px; background: #121212;
-            border: 1px solid #333; margin-top: -6px; box-shadow: 0 0 5px rgba(0, 255, 65, 0.2);
+            border: 1px solid #333; margin-top: -6px;
         }
 
-        .control-panel {
-            display: flex; align-items: center; justify-content: space-between; gap: 15px; width: 100%;
-        }
+        .control-panel { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; }
 
         .play-pause-btn {
             background: #0a0a0a; border: 1px solid #440000; color: #660000;
-            padding: 10px 15px; font-size: 0.65rem; cursor: pointer;
-            text-transform: uppercase; letter-spacing: 2px; flex: 1.2;
-            transition: all 0.3s ease;
+            padding: 8px; font-size: 0.6rem; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 1px; flex: 1.2;
             animation: pulse-red 2s infinite;
         }
 
         @keyframes pulse-red {
-            0% { box-shadow: 0 0 0px rgba(255, 0, 0, 0); }
+            0%, 100% { box-shadow: 0 0 0px rgba(255, 0, 0, 0); }
             50% { box-shadow: 0 0 10px rgba(255, 0, 0, 0.3); color: #aa0000; }
-            100% { box-shadow: 0 0 0px rgba(255, 0, 0, 0); }
         }
 
-        .vol-box { display: flex; align-items: center; gap: 8px; flex: 1; }
-        .vol-label { color: #00FF41; font-size: 10px; opacity: 0.5; }
-        .vol-slider { flex: 1; }
+        .vol-box { display: flex; align-items: center; gap: 5px; flex: 1; }
+        .vol-label { color: #00FF41; font-size: 9px; opacity: 0.5; }
 
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     </style>
@@ -159,7 +164,11 @@
                 <div class="cover-art"></div>
                 <canvas id="visualizer"></canvas>
                 <h2 id="title-text">01100011 01100011 01110011</h2>
-                <p>TERMINAL_AUDIO_STREAM</p>
+                
+                <div class="system-log" id="log-box">
+                    <div class="log-line">> SYSTEM READY...</div>
+                </div>
+
                 <div class="mechanical-controls">
                     <input type="range" id="seek-slider" value="0" max="100">
                 </div>
@@ -167,7 +176,7 @@
                     <button class="play-pause-btn" id="play-btn">SYSTEM OFFLINE</button>
                     <div class="vol-box">
                         <span class="vol-label">VOL</span>
-                        <input type="range" id="volume-slider" class="vol-slider" min="0" max="1" step="0.01" value="0.5">
+                        <input type="range" id="volume-slider" min="0" max="1" step="0.01" value="0.5" style="flex:1">
                     </div>
                 </div>
                 <audio id="music-track" crossorigin="anonymous">
@@ -183,10 +192,32 @@
         const titleText = document.getElementById('title-text');
         const seekSlider = document.getElementById('seek-slider');
         const volSlider = document.getElementById('volume-slider');
+        const logBox = document.getElementById('log-box');
         const canvas = document.getElementById('visualizer');
         const ctx = canvas.getContext('2d');
 
-        let audioCtx, analyser, source, dataArray;
+        let audioCtx, analyser, source, dataArray, logInterval;
+
+        const logMessages = [
+            "[OK] DECODING AUDIO STREAM...",
+            "[INFO] BITRATE: 320KBPS",
+            "[WARN] SIGNAL INTERFERENCE DETECTED",
+            "[SUCCESS] FREQUENCY SYNCHRONIZED",
+            "[DEBUG] RE-ROUTING DATA...",
+            "[SYSTEM] VIRTUALIZER ACTIVE",
+            "[INFO] ANALYZING WAVEFORMS...",
+            "[OK] BUFFER STABLE"
+        ];
+
+        function addLog() {
+            const msg = logMessages[Math.floor(Math.random() * logMessages.length)];
+            const div = document.createElement('div');
+            div.className = 'log-line';
+            div.innerText = `> ${msg}`;
+            logBox.appendChild(div);
+            if (logBox.children.length > 4) logBox.removeChild(logBox.children[0]);
+            logBox.scrollTop = logBox.scrollHeight;
+        }
 
         function initAudio() {
             if (!audioCtx) {
@@ -208,10 +239,8 @@
             const barWidth = (canvas.width / dataArray.length) * 2.5;
             let x = 0;
             for(let i = 0; i < dataArray.length; i++) {
-                const barHeight = dataArray[i] / 4;
-                ctx.fillStyle = `rgba(0, 255, 65, ${barHeight / 50 + 0.2})`;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = '#00FF41';
+                const barHeight = dataArray[i] / 5;
+                ctx.fillStyle = `rgba(0, 255, 65, ${barHeight / 40 + 0.2})`;
                 ctx.fillRect(x, canvas.height - barHeight, barWidth - 2, barHeight);
                 x += barWidth;
             }
@@ -220,14 +249,14 @@
         playBtn.addEventListener('click', () => {
             initAudio();
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            
             if (audio.paused) {
                 audio.play().then(() => {
                     playBtn.innerText = 'ACCESS GRANTED';
                     playBtn.style.color = '#00FF41';
                     playBtn.style.borderColor = '#00FF41';
-                    playBtn.style.animation = 'none'; 
+                    playBtn.style.animation = 'none';
                     titleText.classList.add('active');
+                    logInterval = setInterval(addLog, 2500);
                 });
             } else {
                 audio.pause();
@@ -236,6 +265,7 @@
                 playBtn.style.borderColor = '#440000';
                 playBtn.style.animation = 'pulse-red 2s infinite';
                 titleText.classList.remove('active');
+                clearInterval(logInterval);
             }
         });
 
@@ -245,6 +275,7 @@
     </script>
 </body>
 </html>
+
 
 
 
